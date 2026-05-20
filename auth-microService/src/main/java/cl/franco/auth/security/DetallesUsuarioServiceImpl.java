@@ -17,13 +17,13 @@ public class DetallesUsuarioServiceImpl implements UserDetailsService{
     private final UsuarioRepository usuarioRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String usuarioNombre) throws UserNameNotFoundException{
-        Usuario usuario = usuarioRepository.findByUsername(usuarioNombre)
-            .orElseThrow(() -> new UserNameNotFoundException("Usuarion no encontrado: " + usuarioNombre));
+    public UserDetails loadUserByUsername(String usuarioNombre) throws UsernameNotFoundException{
+        Usuario usuario = usuarioRepository.findByUsuarioNombre(usuarioNombre)
+            .orElseThrow(() -> new UsernameNotFoundException("Usuarion no encontrado: " + usuarioNombre));
     
         return org.springframework.security.core.userdetails.User.builder()
-            .usuarioNombre(usuario.getUsuarioNombre())
-            .clave(usuario.getClave())
+            .username(usuario.getUsuarioNombre())
+            .password(usuario.getClave())
             .authorities(usuario.getRoles().stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList()))

@@ -5,7 +5,7 @@ package cl.franco.auth.controller;
 import cl.franco.auth.dto.AuthenticoRequest;
 import cl.franco.auth.dto.AuthenticoResponse;
 import cl.franco.auth.dto.RegistroRequest;
-
+import cl.franco.auth.security.JwtUtil;
 import cl.franco.auth.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +18,41 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
-
-
-
-
-
-
-
-
+@RestController
+@RequestMapping ("/auth")
+@RequiredArgsConstructor
 public class AuthenticoController {
+    
+    private final AuthenticationManager authenticationManager;
+    private final UsuarioService usuarioService;
+    private final JwtUtil jwtUtil;
+
+    private static final Logger log = LoggerFactory.getLogger(AuthenticoController.class);
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticoResponse> login(@Valid @RequestBody AuthenticoRequest request){
+        MDC.put("user", request.getUsuarioNombre());
+        log.info("Intento de Logearse");
+
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.getUsuarioNombre(), request.getClave()));
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String token = jwtUtil.generateToken(userDetails);
+
+        log.info("Logeo exitoso para el usuario: ", request.getUsuarioNombre());
+        return ResponseEntity.ok(new AuthenticoResponse(token));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@Valid @RequestBody RegistroRequest request){
+        
+        MDC.put("")
+    }
+
+
 
 }
