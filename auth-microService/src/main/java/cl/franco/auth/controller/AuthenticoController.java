@@ -49,8 +49,21 @@ public class AuthenticoController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegistroRequest request){
-        
-        MDC.put("")
+        String username = request.getUsuarioNombre();
+        MDC.put("user", username);
+        log.info("Intento de registro para usuario: {}", username);
+
+        try{
+            usuarioService.registroUsuario(username, request.getClave(), request.getRoles());
+            log.info("Usuario registrado exitosamente: {}", username);
+            return ResponseEntity.status(HttpStatus.CREATED).body("El usuario se ha registrado exitosamente");
+        } catch (RuntimeException e) {
+            log.error("Fallo en registro para usuario: {} - {}", username, e.getMessage());
+            throw e; // El manejador global devolverá 400 o 409 según corresponda
+        } finally {
+            MDC.clear();
+
+        }
     }
 
 
