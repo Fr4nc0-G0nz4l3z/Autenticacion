@@ -28,17 +28,17 @@ public class JwtUtil {
     }
 
 
-    public String generateToken(UserDetails userDetails){
+    public String generateToken(UserDetails detallesUsuario){
         Map<String, Object> claims = new HashMap<>();
 
-        String roles = userDetails.getAuthorities().stream()
+        String roles = detallesUsuario.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
         claims.put("roles", roles);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(detallesUsuario.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

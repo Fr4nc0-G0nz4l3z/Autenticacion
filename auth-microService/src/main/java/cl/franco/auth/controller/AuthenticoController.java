@@ -40,8 +40,8 @@ public class AuthenticoController {
 
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getUsuarioNombre(), request.getClave()));
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String token = jwtUtil.generateToken(userDetails);
+        UserDetails detallesUsuario = (UserDetails) authentication.getPrincipal();
+        String token = jwtUtil.generateToken(detallesUsuario);
 
         log.info("Logeo exitoso para el usuario: ", request.getUsuarioNombre());
         return ResponseEntity.ok(new AuthenticoResponse(token));
@@ -49,16 +49,16 @@ public class AuthenticoController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegistroRequest request){
-        String username = request.getUsuarioNombre();
-        MDC.put("user", username);
-        log.info("Intento de registro para usuario: {}", username);
+        String usuarioNombre = request.getUsuarioNombre();
+        MDC.put("user", usuarioNombre);
+        log.info("Intento de registro para usuario: {}", usuarioNombre);
 
         try{
-            usuarioService.registroUsuario(username, request.getClave(), request.getRoles());
-            log.info("Usuario registrado exitosamente: {}", username);
+            usuarioService.registroUsuario(usuarioNombre, request.getClave(), request.getRoles());
+            log.info("Usuario registrado exitosamente: {}", usuarioNombre);
             return ResponseEntity.status(HttpStatus.CREATED).body("El usuario se ha registrado exitosamente");
         } catch (RuntimeException e) {
-            log.error("Fallo en registro para usuario: {} - {}", username, e.getMessage());
+            log.error("Fallo en registro para usuario: {} - {}", usuarioNombre, e.getMessage());
             throw e; // El manejador global devolverá 400 o 409 según corresponda
         } finally {
             MDC.clear();
